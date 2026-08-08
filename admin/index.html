@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Super Admin | Kasangati Greater II Leos Club</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f6fb;
+    color:#172554;
+}
+
+/* LOGIN */
+
+.login-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:linear-gradient(
+        135deg,
+        #061b63,
+        #082d83
+    );
+}
+
+.login-box{
+    width:100%;
+    max-width:430px;
+    background:white;
+    padding:35px;
+    border-radius:22px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+
+.login-logo{
+    width:110px;
+    height:110px;
+    object-fit:contain;
+    margin-bottom:15px;
+}
+
+.login-box h1{
+    color:#061b63;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    color:#64748b;
+    margin-bottom:25px;
+}
+
+label{
+    display:block;
+    text-align:left;
+    font-weight:bold;
+    margin:14px 0 7px;
+}
+
+input,
+textarea{
+    width:100%;
+    padding:14px;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    font-size:15px;
+}
+
+textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+button{
+    border:none;
+    border-radius:10px;
+    background:#082b8f;
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+    padding:13px 18px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.login-button{
+    width:100%;
+    margin-top:18px;
+}
+
+#error{
+    color:#dc2626;
+    margin-top:15px;
+    display:none;
+}
+
+#connectionStatus{
+    margin-top:15px;
+    font-size:13px;
+}
+
+/* DASHBOARD */
+
+#dashboard{
+    min-height:100vh;
+    display:none;
+}
+
+.admin-header{
+    height:70px;
+    background:#061b63;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 25px;
+}
+
+.admin-brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.admin-brand img{
+    width:48px;
+    height:48px;
+    object-fit:contain;
+    background:white;
+    border-radius:50%;
+}
+
+.admin-brand small{
+    display:block;
+    color:#dbeafe;
+    margin-top:3px;
+}
+
+.logout{
+    background:#dc2626;
+}
+
+.admin-layout{
+    display:flex;
+    min-height:calc(100vh - 70px);
+}
+
+.admin-sidebar{
+    width:250px;
+    background:#071c5c;
+    padding:20px 12px;
+    flex-shrink:0;
+}
+
+.admin-sidebar h3{
+    color:#cbd5e1;
+    font-size:12px;
+    padding:10px 12px;
+}
+
+.admin-sidebar button{
+    width:100%;
+    text-align:left;
+    margin-bottom:5px;
+    background:transparent;
+    padding:13px;
+    border-radius:8px;
+}
+
+.admin-sidebar button:hover,
+.admin-sidebar button.active{
+    background:#123da3;
+}
+
+.admin-content{
+    flex:1;
+    padding:30px;
+}
+
+.admin-page{
+    display:none;
+}
+
+.admin-page.active{
+    display:block;
+}
+
+.admin-page h1{
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.admin-page > p{
+    color:#64748b;
+    margin-bottom:25px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin:25px 0;
+}
+
+.stat-card,
+.control-card,
+.welcome-card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+    margin-bottom:20px;
+}
+
+.stat-card span{
+    font-size:25px;
+}
+
+.stat-card h2{
+    color:#061b63;
+    font-size:30px;
+    margin-top:10px;
+}
+
+.stat-card p{
+    color:#64748b;
+}
+
+.control-card h2{
+    color:#061b63;
+    margin-bottom:15px;
+}
+
+.save-button{
+    margin-top:20px;
+    background:#082b8f;
+}
+
+.success{
+    color:#15803d;
+    margin-top:12px;
+}
+
+.status{
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:20px;
+    background:#eff6ff;
+    color:#1d4ed8;
+}
+
+@media(max-width:900px){
+
+    .admin-sidebar{
+        width:200px;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+
+    .admin-layout{
+        display:block;
+    }
+
+    .admin-sidebar{
+        width:100%;
+    }
+
+    .admin-content{
+        padding:18px;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .admin-header{
+        padding:10px 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= LOGIN ================= -->
+
+<div class="login-page" id="loginPage">
+
+    <div class="login-box">
+
+        <img
+            src="../images/logo.png"
+            class="login-logo"
+            alt="Kasangati Greater II Leos Club">
+
+        <h1>Super Admin</h1>
+
+        <p class="subtitle">
+            Kasangati Greater II Leos Club
+        </p>
+
+        <label>Username</label>
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Enter username">
+
+        <label>Password</label>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Enter password">
+
+        <button
+            class="login-button"
+            onclick="login()">
+            🔐 Login
+        </button>
+
+        <p id="error">
+            Incorrect username or password.
+        </p>
+
+        <p id="connectionStatus">
+            Checking database connection...
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<div id="dashboard">
+
+<header class="admin-header">
+
+    <div class="admin-brand">
+
+        <img
+            src="../images/logo.png"
+            alt="Club logo">
+
+        <div>
+
+            <strong>
+                Kasangati Greater II Leos Club
+            </strong>
+
+            <small>
+                Super Admin
+            </small>
+
+        </div>
+
+    </div>
+
+    <button
+        class="logout"
+        onclick="logout()">
+        Logout
+    </button>
+
+</header>
+
+
+<div class="admin-layout">
+
+<!-- SIDEBAR -->
+
+<aside class="admin-sidebar">
+
+    <h3>ADMIN MENU</h3>
+
+    <button onclick="showPage('dashboardHome',this)">
+        📊 Dashboard
+    </button>
+
+    <button onclick="showPage('homepage',this)">
+        🏠 Homepage
+    </button>
+
+    <button onclick="showPage('about',this)">
+        ℹ️ About Club
+    </button>
+
+    <button onclick="showPage('events',this)">
+        📅 Events
+    </button>
+
+    <button onclick="showPage('projects',this)">
+        🤝 Service Projects
+    </button>
+
+    <button onclick="showPage('gallery',this)">
+        📸 Gallery
+    </button>
+
+    <button onclick="showPage('leadership',this)">
+        👥 Leadership
+    </button>
+
+    <button onclick="showPage('meetings',this)">
+        📍 Meetings
+    </button>
+
+    <button onclick="showPage('motherClub',this)">
+        🦁 Mother Club
+    </button>
+
+    <button onclick="showPage('contact',this)">
+        📞 Contact
+    </button>
+
+    <button onclick="showPage('social',this)">
+        📱 Social Media
+    </button>
+
+</aside>
+
+
+<!-- CONTENT -->
+
+<main class="admin-content">
+
+<!-- DASHBOARD -->
+
+<section
+    id="dashboardHome"
+    class="admin-page active">
+
+    <h1>
+        Welcome, Super Admin 👋
+    </h1>
+
+    <p>
+        Control the Kasangati Greater II Leos Club website.
+    </p>
+
+    <div
+        id="databaseMessage"
+        class="status">
+        Connecting to Supabase...
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <span>📅</span>
+            <h2 id="eventCount">0</h2>
+            <p>Events</p>
+        </div>
+
+        <div class="stat-card">
+            <span>🤝</span>
+            <h2 id="projectCount">0</h2>
+            <p>Projects</p>
+        </div>
+
+        <div class="stat-card">
+            <span>📸</span>
+            <h2 id="photoCount">0</h2>
+            <p>Photos</p>
+        </div>
+
+        <div class="stat-card">
+            <span>👥</span>
+            <h2 id="leaderCount">0</h2>
+            <p>Leaders</p>
+        </div>
+
+    </div>
+
+    <div class="welcome-card">
+
+        <h2>
+            Website Control Center
+        </h2>
+
+        <p>
+            Use the menu to manage your homepage,
+            club information, events, projects,
+            gallery, leadership, meetings,
+            mother club and contact information.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- HOMEPAGE -->
+
+<section
+    id="homepage"
+    class="admin-page">
+
+    <h1>Homepage</h1>
+
+    <p>
+        Edit the main information visitors see.
+    </p>
+
+    <div class="control-card">
+
+        <label>Website Title</label>
+
+        <input
+            id="site_title"
+            type="text">
+
+        <label>Homepage Heading</label>
+
+        <input
+            id="hero_title"
+            type="text">
+
+        <label>Homepage Description</label>
+
+        <textarea
+            id="hero_description"></textarea>
+
+        <button
+            class="save-button"
+            onclick="saveHomepage()">
+            💾 Save Homepage
+        </button>
+
+        <p
+            id="homepageMessage"
+            class="success">
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ABOUT -->
+
+<section
+    id="about"
+    class="admin-page">
+
+    <h1>About Club</h1>
+
+    <div class="control-card">
+
+        <label>About Title</label>
+
+        <input id="about_title">
+
+        <label>About Description</label>
+
+        <textarea id="about_description"></textarea>
+
+        <label>Mission</label>
+
+        <textarea id="mission"></textarea>
+
+        <label>Vision</label>
+
+        <textarea id="vision"></textarea>
+
+        <button
+            class="save-button"
+            onclick="saveAbout()">
+            💾 Save About
+        </button>
+
+        <p id="aboutMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+
+<!-- MEETINGS -->
+
+<section
+    id="meetings"
+    class="admin-page">
+
+    <h1>Meeting Information</h1>
+
+    <div class="control-card">
+
+        <h2>Kasangati Greater II Leos Club</h2>
+
+        <label>Meeting Day</label>
+
+        <input id="meeting_day">
+
+        <label>Meeting Time</label>
+
+        <input id="meeting_time">
+
+        <label>Meeting Venue</label>
+
+        <input id="meeting_venue">
+
+        <button
+            class="save-button"
+            onclick="saveMeetings()">
+            💾 Save Meeting Information
+        </button>
+
+        <p id="meetingMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+
+<!-- MOTHER CLUB -->
+
+<section
+    id="motherClub"
+    class="admin-page">
+
+    <h1>Mother Club</h1>
+
+    <div class="control-card">
+
+        <label>Club Name</label>
+
+        <input id="mother_club_name">
+
+        <label>Meeting Day</label>
+
+        <input id="mother_club_day">
+
+        <label>Meeting Time</label>
+
+        <input id="mother_club_time">
+
+        <label>Venue</label>
+
+        <input id="mother_club_venue">
+
+        <button
+            class="save-button"
+            onclick="saveMotherClub()">
+            💾 Save Mother Club
+        </button>
+
+        <p id="motherMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+
+<!-- CONTACT -->
+
+<section
+    id="contact"
+    class="admin-page">
+
+    <h1>Contact Information</h1>
+
+    <div class="control-card">
+
+        <label>Phone</label>
+
+        <input id="phone">
+
+        <label>Email</label>
+
+        <input id="email">
+
+        <button
+            class="save-button"
+            onclick="saveContact()">
+            💾 Save Contact
+        </button>
+
+        <p id="contactMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+
+<!-- SOCIAL -->
+
+<section
+    id="social"
+    class="admin-page">
+
+    <h1>Social Media</h1>
+
+    <div class="control-card">
+
+        <label>TikTok</label>
+        <input id="tiktok">
+
+        <label>Facebook</label>
+        <input id="facebook">
+
+        <label>Instagram</label>
+        <input id="instagram">
+
+        <label>YouTube</label>
+        <input id="youtube">
+
+        <button
+            class="save-button"
+            onclick="saveSocial()">
+            💾 Save Social Media
+        </button>
+
+        <p id="socialMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+
+<!-- EVENTS -->
+
+<section
+    id="events"
+    class="admin-page">
+
+    <h1>Events</h1>
+
+    <div class="control-card">
+
+        <h2>Add Event</h2>
+
+        <label>Event Name</label>
+
+        <input
+            id="eventName"
+            placeholder="Event name">
+
+        <label>Date</label>
+
+        <input
+            id="eventDate"
+            type="date">
+
+        <label>Time</label>
+
+        <input
+            id="eventTime"
+            type="time">
+
+        <label>Venue</label>
+
+        <input
+            id="eventVenue"
+            placeholder="Venue">
+
+        <label>Description</label>
+
+        <textarea
+            id="eventDescription"
+            placeholder="Event description"></textarea>
+
+        <button
+            class="save-button"
+            onclick="addEvent()">
+            ➕ Add Event
+        </button>
+
+        <p id="eventMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+
+<!-- PROJECTS -->
+
+<section
+    id="projects"
+    class="admin-page">
+
+    <h1>Service Projects</h1>
+
+    <div class="control-card">
+
+        <label>Project Name</label>
+
+        <input
+            id="projectName"
+            placeholder="Project name">
+
+        <label>Description</label>
+
+        <textarea
+            id="projectDescription"></textarea>
+
+        <button
+            class="save-button"
+            onclick="addProject()">
+            ➕ Add Project
+        </button>
+
+        <p id="projectMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+
+<!-- GALLERY -->
+
+<section
+    id="gallery"
+    class="admin-page">
+
+    <h1>Gallery</h1>
+
+    <div class="control-card">
+
+        <p>
+            Gallery upload will be connected to
+            Supabase Storage next.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- LEADERSHIP -->
+
+<section
+    id="leadership"
+    class="admin-page">
+
+    <h1>Leadership</h1>
+
+    <div class="control-card">
+
+        <label>Name</label>
+
+        <input
+            id="leaderName"
+            placeholder="Leader name">
+
+        <label>Position</label>
+
+        <input
+            id="leaderPosition"
+            placeholder="President">
+
+        <label>Biography</label>
+
+        <textarea
+            id="leaderBio"></textarea>
+
+        <button
+            class="save-button"
+            onclick="addLeader()">
+            ➕ Add Leader
+        </button>
+
+        <p id="leaderMessage" class="success"></p>
+
+    </div>
+
+</section>
+
+</main>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   SUPABASE CONNECTION
+===================================================== */
+
+const SUPABASE_URL =
+"https://yplkipnscwqajdiqhsv.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+"sb_publishable_Ny_X9_HlcklE5Ipt7UTsjQ_fa5qkWev";
+
+let supabaseClient;
+
+
+/* INITIALIZE */
+
+try {
+
+    if (!window.supabase) {
+
+        throw new Error(
+            "Supabase library did not load."
+        );
+
+    }
+
+    supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+    document.getElementById(
+        "connectionStatus"
+    ).textContent =
+        "✓ Supabase library loaded";
+
+    document.getElementById(
+        "connectionStatus"
+    ).style.color =
+        "#15803d";
+
+} catch(error){
+
+    console.error(error);
+
+    document.getElementById(
+        "connectionStatus"
+    ).textContent =
+        "❌ Supabase initialization failed";
+
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+function login(){
+
+    const username =
+        document.getElementById(
+            "username"
+        ).value.trim();
+
+    const password =
+        document.getElementById(
+            "password"
+        ).value;
+
+    /*
+       TEMPORARY LOGIN
+
+       We will replace this with
+       Supabase Authentication.
+    */
+
+    if(
+        username === "superadmin" &&
+        password === "change-me"
+    ){
+
+        document.getElementById(
+            "loginPage"
+        ).style.display = "none";
+
+        document.getElementById(
+            "dashboard"
+        ).style.display = "block";
+
+        loadSiteContent();
+
+    }else{
+
+        document.getElementById(
+            "error"
+        ).style.display = "block";
+
+    }
+
+}
+
+
+/* LOGOUT */
+
+function logout(){
+
+    document.getElementById(
+        "dashboard"
+    ).style.display = "none";
+
+    document.getElementById(
+        "loginPage"
+    ).style.display = "flex";
+
+}
+
+
+/* =====================================================
+   PAGE NAVIGATION
+===================================================== */
+
+function showPage(pageId, button){
+
+    document
+        .querySelectorAll(".admin-page")
+        .forEach(page => {
+
+            page.classList.remove("active");
+
+        });
+
+    document
+        .getElementById(pageId)
+        .classList.add("active");
+
+    document
+        .querySelectorAll(".admin-sidebar button")
+        .forEach(btn => {
+
+            btn.classList.remove("active");
+
+        });
+
+    if(button){
+
+        button.classList.add("active");
+
+    }
+
+}
+
+
+/* =====================================================
+   LOAD SITE CONTENT
+===================================================== */
+
+async function loadSiteContent(){
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+        await supabaseClient
+            .from("site_content")
+            .select("*")
+            .eq("id",1)
+            .maybeSingle();
+
+        if(error){
+
+            throw error;
+
+        }
+
+        if(!data){
+
+            document.getElementById(
+                "databaseMessage"
+            ).textContent =
+                "⚠️ No site_content record found.";
+
+            return;
+
+        }
+
+        /* HOMEPAGE */
+
+        document.getElementById(
+            "site_title"
+        ).value =
+            data.site_title || "";
+
+        document.getElementById(
+            "hero_title"
+        ).value =
+            data.hero_title || "";
+
+        document.getElementById(
+            "hero_description"
+        ).value =
+            data.hero_description || "";
+
+
+        /* ABOUT */
+
+        document.getElementById(
+            "about_title"
+        ).value =
+            data.about_title || "";
+
+        document.getElementById(
+            "about_description"
+        ).value =
+            data.about_description || "";
+
+        document.getElementById(
+            "mission"
+        ).value =
+            data.mission || "";
+
+        document.getElementById(
+            "vision"
+        ).value =
+            data.vision || "";
+
+
+        /* MEETING */
+
+        document.getElementById(
+            "meeting_day"
+        ).value =
+            data.meeting_day || "";
+
+        document.getElementById(
+            "meeting_time"
+        ).value =
+            data.meeting_time || "";
+
+        document.getElementById(
+            "meeting_venue"
+        ).value =
+            data.meeting_venue || "";
+
+
+        /* MOTHER CLUB */
+
+        document.getElementById(
+            "mother_club_name"
+        ).value =
+            data.mother_club_name || "";
+
+        document.getElementById(
+            "mother_club_day"
+        ).value =
+            data.mother_club_day || "";
+
+        document.getElementById(
+            "mother_club_time"
+        ).value =
+            data.mother_club_time || "";
+
+        document.getElementById(
+            "mother_club_venue"
+        ).value =
+            data.mother_club_venue || "";
+
+
+        /* CONTACT */
+
+        document.getElementById(
+            "phone"
+        ).value =
+            data.phone || "";
+
+        document.getElementById(
+            "email"
+        ).value =
+            data.email || "";
+
+
+        /* SOCIAL */
+
+        document.getElementById(
+            "tiktok"
+        ).value =
+            data.tiktok || "";
+
+        document.getElementById(
+            "facebook"
+        ).value =
+            data.facebook || "";
+
+        document.getElementById(
+            "instagram"
+        ).value =
+            data.instagram || "";
+
+        document.getElementById(
+            "youtube"
+        ).value =
+            data.youtube || "";
+
+
+        document.getElementById(
+            "databaseMessage"
+        ).textContent =
+            "✓ Successfully connected to Supabase and loaded website content.";
+
+        document.getElementById(
+            "databaseMessage"
+        ).style.color =
+            "#15803d";
+
+        console.log(
+            "Site content:",
+            data
+        );
+
+    }catch(error){
+
+        console.error(
+            "Supabase connection error:",
+            error
+        );
+
+        document.getElementById(
+            "databaseMessage"
+        ).textContent =
+            "❌ Supabase connection error: " +
+            error.message;
+
+        document.getElementById(
+            "databaseMessage"
+        ).style.color =
+            "#dc2626";
+
+    }
+
+}
+
+
+/* =====================================================
+   UPDATE SITE CONTENT
+===================================================== */
+
+async function updateSiteContent(values,messageId){
+
+    try{
+
+        const {
+            error
+        } =
+        await supabaseClient
+            .from("site_content")
+            .update(values)
+            .eq("id",1);
+
+        if(error){
+
+            throw error;
+
+        }
+
+        document.getElementById(
+            messageId
+        ).textContent =
+            "✓ Changes saved successfully.";
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById(
+            messageId
+        ).textContent =
+            "❌ Save failed: " +
+            error.message;
+
+    }
+
+}
+
+
+/* HOMEPAGE SAVE */
+
+function saveHomepage(){
+
+    updateSiteContent({
+
+        site_title:
+            document.getElementById(
+                "site_title"
+            ).value,
+
+        hero_title:
+            document.getElementById(
+                "hero_title"
+            ).value,
+
+        hero_description:
+            document.getElementById(
+                "hero_description"
+            ).value
+
+    },"homepageMessage");
+
+}
+
+
+/* ABOUT SAVE */
+
+function saveAbout(){
+
+    updateSiteContent({
+
+        about_title:
+            document.getElementById(
+                "about_title"
+            ).value,
+
+        about_description:
+            document.getElementById(
+                "about_description"
+            ).value,
+
+        mission:
+            document.getElementById(
+                "mission"
+            ).value,
+
+        vision:
+            document.getElementById(
+                "vision"
+            ).value
+
+    },"aboutMessage");
+
+}
+
+
+/* MEETING SAVE */
+
+function saveMeetings(){
+
+    updateSiteContent({
+
+        meeting_day:
+            document.getElementById(
+                "meeting_day"
+            ).value,
+
+        meeting_time:
+            document.getElementById(
+                "meeting_time"
+            ).value,
+
+        meeting_venue:
+            document.getElementById(
+                "meeting_venue"
+            ).value
+
+    },"meetingMessage");
+
+}
+
+
+/* MOTHER CLUB SAVE */
+
+function saveMotherClub(){
+
+    updateSiteContent({
+
+        mother_club_name:
+            document.getElementById(
+                "mother_club_name"
+            ).value,
+
+        mother_club_day:
+            document.getElementById(
+                "mother_club_day"
+            ).value,
+
+        mother_club_time:
+            document.getElementById(
+                "mother_club_time"
+            ).value,
+
+        mother_club_venue:
+            document.getElementById(
+                "mother_club_venue"
+            ).value
+
+    },"motherMessage");
+
+}
+
+
+/* CONTACT SAVE */
+
+function saveContact(){
+
+    updateSiteContent({
+
+        phone:
+            document.getElementById(
+                "phone"
+            ).value,
+
+        email:
+            document.getElementById(
+                "email"
+            ).value
+
+    },"contactMessage");
+
+}
+
+
+/* SOCIAL SAVE */
+
+function saveSocial(){
+
+    updateSiteContent({
+
+        tiktok:
+            document.getElementById(
+                "tiktok"
+            ).value,
+
+        facebook:
+            document.getElementById(
+                "facebook"
+            ).value,
+
+        instagram:
+            document.getElementById(
+                "instagram"
+            ).value,
+
+        youtube:
+            document.getElementById(
+                "youtube"
+            ).value
+
+    },"socialMessage");
+
+}
+
+
+/* =====================================================
+   ADD EVENT
+===================================================== */
+
+async function addEvent(){
+
+    const name =
+        document.getElementById(
+            "eventName"
+        ).value;
+
+    const date =
+        document.getElementById(
+            "eventDate"
+        ).value;
+
+    const time =
+        document.getElementById(
+            "eventTime"
+        ).value;
+
+    const venue =
+        document.getElementById(
+            "eventVenue"
+        ).value;
+
+    const description =
+        document.getElementById(
+            "eventDescription"
+        ).value;
+
+    try{
+
+        const {
+            error
+        } =
+        await supabaseClient
+            .from("events")
+            .insert({
+
+                name:name,
+                date:date,
+                time:time,
+                venue:venue,
+                description:description
+
+            });
+
+        if(error){
+
+            throw error;
+
+        }
+
+        document.getElementById(
+            "eventMessage"
+        ).textContent =
+            "✓ Event added successfully.";
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById(
+            "eventMessage"
+        ).textContent =
+            "❌ " + error.message;
+
+    }
+
+}
+
+
+/* =====================================================
+   ADD PROJECT
+===================================================== */
+
+async function addProject(){
+
+    const name =
+        document.getElementById(
+            "projectName"
+        ).value;
+
+    const description =
+        document.getElementById(
+            "projectDescription"
+        ).value;
+
+    try{
+
+        const {
+            error
+        } =
+        await supabaseClient
+            .from("projects")
+            .insert({
+
+                name:name,
+                description:description
+
+            });
+
+        if(error){
+
+            throw error;
+
+        }
+
+        document.getElementById(
+            "projectMessage"
+        ).textContent =
+            "✓ Project added successfully.";
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById(
+            "projectMessage"
+        ).textContent =
+            "❌ " + error.message;
+
+    }
+
+}
+
+
+/* =====================================================
+   ADD LEADER
+===================================================== */
+
+async function addLeader(){
+
+    const name =
+        document.getElementById(
+            "leaderName"
+        ).value;
+
+    const position =
+        document.getElementById(
+            "leaderPosition"
+        ).value;
+
+    const biography =
+        document.getElementById(
+            "leaderBio"
+        ).value;
+
+    try{
+
+        const {
+            error
+        } =
+        await supabaseClient
+            .from("leadership")
+            .insert({
+
+                name:name,
+                position:position,
+                biography:biography
+
+            });
+
+        if(error){
+
+            throw error;
+
+        }
+
+        document.getElementById(
+            "leaderMessage"
+        ).textContent =
+            "✓ Leader added successfully.";
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById(
+            "leaderMessage"
+        ).textContent =
+            "❌ " + error.message;
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
